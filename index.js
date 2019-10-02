@@ -25,7 +25,7 @@ class Accumulator {
     this.n = n
     this.H = H
     this.c = (c ? c : bn.fromBuffer(crypto.randomBytes(Math.ceil(this.n.bitLength() / 8)))).mod(this.n)
-    this.Pi = bn.ONE
+    this.z = G
     this.Q = infinity
     this.i = null
   }
@@ -41,10 +41,10 @@ class Accumulator {
     tf(tf.tuple(type.Data), arguments)
     // Map data to e in Zq.
     const e = map(this.H, d, this.n)
-    // Create witness before updating Pi.
-    const w = this.G.multiply(this.Pi)
-    // Update Pi' = Pi * (e + c) mod n.
-    this.Pi = this.Pi.multiply(e.add(this.c).mod(this.n)).mod(this.n)
+    // Create witness before updating z.
+    const w = this.z
+    // Update z' = z ^ ((e + c) mod n).
+    this.z = this.z.multiply(e.add(this.c).mod(this.n))
     // If Q is the point at infinity, Q = G, otherwise Q = Q ^ c.
     this.Q = this.Q.equals(this.infinity) ? this.G : this.Q.multiply(this.c)
     // If i is null, i = 0, otherwise i + 1.
@@ -71,8 +71,8 @@ class Accumulator {
     assert(this.verify({d, w}), 'Accumulator does not contain d')
     // Map data to e in Zq.
     const e = map(this.H, d, this.n)
-    // Update Pi' = Pi * (e + c) ^ -1 mod n.
-    this.Pi = this.Pi.multiply(e.add(this.c).mod(this.n).modInverse(this.n)).mod(this.n)
+    // Update z' = z ^ ((e + c)^-1 mod n).
+    this.z = this.z.multiply(e.add(this.c).mod(this.n).modInverse(this.n))
     // If Q is G, Q = the point at infinity, otherwise Q = G ^ (c ^ -1).
     this.Q = this.Q.equals(this.G) ? this.infinity : this.Q.multiply(this.c.modInverse(this.n))
     // If i is 0, i = null, otherwise i = i - 1.
@@ -96,10 +96,8 @@ class Accumulator {
     tf(tf.tuple(type.Witness), arguments)
     // Map data to e in Zq.
     const e = map(this.H, d, this.n)
-    // Compute z = G * Pi
-    const z = this.G.multiply(this.Pi)
     // Compare z and w ^ (map(e) + c mod n)
-    return z.equals(w.multiply(e.add(this.c).mod(this.n)))
+    return this.z.equals(w.multiply(e.add(this.c).mod(this.n)))
   }
 
 }

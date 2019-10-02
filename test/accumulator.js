@@ -22,8 +22,8 @@ describe('accumulator over secp256k1', function() {
 
       it('constructs accumulator', function() {
         accumulator = new Accumulator(curve, hash, c)
-        accumulator.should.have.property('Pi').which.is.an.instanceOf(bn)
-        should(accumulator.Pi.compareTo(bn.ONE)).equals(0)
+        accumulator.should.have.property('z').which.is.an.instanceOf(ec.Point)
+        accumulator.z.equals(curve.G).should.equal(true)
         accumulator.should.have.property('Q').which.equals(curve.infinity)
         accumulator.should.have.property('i').which.is.null()
       })
