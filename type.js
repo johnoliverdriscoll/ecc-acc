@@ -1,4 +1,5 @@
 'use strict'
+const crypto = require('crypto')
 const tf = require('typeforce')
 
 /**
@@ -16,7 +17,7 @@ const Curve = tf.quacksLike('Curve')
 
 const Data = tf.oneOf(tf.String, tf.Buffer)
 
-const Hash = tf.oneOf(tf.String, tf.Function)
+const Hash = tf.oneOf(tf.Function, ...crypto.getHashes().map(hash => tf.value(hash)))
 
 /**
  * @typedef {Object} Point
@@ -28,27 +29,26 @@ const Point = tf.quacksLike('Point')
 /**
  * @typedef {Object} Update
  * @property {(String|Buffer)} The element.
- * @property {Object} Qi The public component.
- * @property {Point} Qi.Q The point.
- * @property {Number} Qi.i The index.
+ * @property {Point} z The current accumulation.
+ * @property {Point} Q The public component.
+ * @property {Number} i The index.
  */
 const Update = tf.object({
   d: Data,
-  Qi: tf.object({
-    Q: Point,
-    i: tf.oneOf(tf.Null, tf.Number),
-  }),
+  z: Point,
+  Q: Point,
+  i: tf.oneOf(tf.Null, tf.Number),
 })
 
 /**
  * @typedef {Object} Witness
  * @property {(String|Buffer)} d The element.
- * @property {Point} w The witness.
- * @property {Point} Qi The upblic component.
- * @property {Number} i The index.
+ * @property {Point} v The previous accumulation.
+ * @property {Point} w The previous accumulation raised to the secret value.
  */
 const Witness = tf.object({
   d: Data,
+  v: Point,
   w: Point,
 })
 

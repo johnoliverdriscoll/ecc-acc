@@ -1,6 +1,8 @@
 # ecc-acc
 
-This is an implementation of a cryptographic accumulator over elliptic curves.
+This is an implementation of [An Accumulator Based on Bilinear Maps and Efficient
+Revocation for Anonymous Credentials](https://eprint.iacr.org/2008/539.pdf). It is
+a proof-of-concept cryptographic accumulator over elliptic curves.
 
 Features:
 
@@ -127,8 +129,8 @@ assert(accumulator.verify(w3) === false)
 
 * [Accumulator](#Accumulator)
     * [new Accumulator(curve, H, [c])](#new_Accumulator_new)
-    * [.add(d)](#Accumulator+add) ⇒ <code>Witness</code>
-    * [.del(update)](#Accumulator+del) ⇒ <code>Update</code>
+    * [.add(d)](#Accumulator+add) ⇒ [<code>Witness</code>](#Witness)
+    * [.del(update)](#Accumulator+del) ⇒ [<code>Update</code>](#Update)
     * [.verify(updateOrWitness)](#Accumulator+verify) ⇒ <code>Boolean</code>
 
 <a name="new_Accumulator_new"></a>
@@ -140,17 +142,17 @@ can modify the accumulation of member elements.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| curve | <code>Curve</code> | An object containing the curve parameters. |
+| curve | [<code>Curve</code>](#Curve) | An object containing the curve parameters. |
 | H | <code>String</code> \| <code>function</code> | The name of a hash algorithm or a function that returns a digest for an input String or Buffer. |
-| [c] | <code>BigInteger</code> | An optional secret. If not provided, a random secret is generated. |
+| [c] | [<code>BigInteger</code>](#BigInteger) | An optional secret. If not provided, a random secret is generated. |
 
 <a name="Accumulator+add"></a>
 
-### accumulator.add(d) ⇒ <code>Witness</code>
+### accumulator.add(d) ⇒ [<code>Witness</code>](#Witness)
 Add an element to the accumulation.
 
 **Kind**: instance method of [<code>Accumulator</code>](#Accumulator)  
-**Returns**: <code>Witness</code> - An update object that includes the data added, its witness, and the
+**Returns**: [<code>Witness</code>](#Witness) - An update object that includes the data added, its witness, and the
 public component. This object can be passed to [Prover.update](#Prover+update),
 [Accumulator.verify](#Accumulator+update), and [Accumulator.del](#Accumulator+del).  
 
@@ -160,16 +162,16 @@ public component. This object can be passed to [Prover.update](#Prover+update),
 
 <a name="Accumulator+del"></a>
 
-### accumulator.del(update) ⇒ <code>Update</code>
+### accumulator.del(update) ⇒ [<code>Update</code>](#Update)
 Delete an element from the accumulation.
 
 **Kind**: instance method of [<code>Accumulator</code>](#Accumulator)  
-**Returns**: <code>Update</code> - The updated public component. This object can be passed to
+**Returns**: [<code>Update</code>](#Update) - The updated public component. This object can be passed to
 [Prover.update](#Prover+update).  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| update | <code>Witness</code> | An object previously returned from [Accumulator.add](#Accumulator+add), [Accumulator.del](#Accumulator+del), or [Prover.prove](#Prover+prove). |
+| update | [<code>Witness</code>](#Witness) | An object previously returned from [Accumulator.add](#Accumulator+add), [Accumulator.del](#Accumulator+del), or [Prover.prove](#Prover+prove). |
 
 <a name="Accumulator+verify"></a>
 
@@ -181,7 +183,7 @@ Verify an element is a member of the accumulation.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| updateOrWitness | <code>Update</code> \| <code>Witness</code> | An update object returned from [Accumulator.add](#Accumulator+add) or a witness object returned from [Prover.prove](#Prover+prove). |
+| updateOrWitness | [<code>Update</code>](#Update) \| [<code>Witness</code>](#Witness) | An update object returned from [Accumulator.add](#Accumulator+add) or a witness object returned from [Prover.prove](#Prover+prove). |
 
 
 ## Prover
@@ -191,7 +193,8 @@ Verify an element is a member of the accumulation.
 * [Prover](#Prover)
     * [new Prover(curve, H)](#new_Prover_new)
     * [.update(updateOrWitness)](#Prover+update)
-    * [.prove(d)](#Prover+prove) ⇒ <code>Witness</code>
+    * [.prove(d)](#Prover+prove) ⇒ [<code>Witness</code>](#Witness)
+    * [.verify(updateOrWitness)](#Prover+verify) ⇒ <code>Boolean</code>
 
 <a name="new_Prover_new"></a>
 
@@ -202,7 +205,7 @@ Accumulator and can compute witnesses for elements based on that information.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| curve | <code>Curve</code> | An object containing the curve parameters. |
+| curve | [<code>Curve</code>](#Curve) | An object containing the curve parameters. |
 | H | <code>String</code> \| <code>function</code> | The name of a hash algorithm or a function that produces a digest for an input String or Buffer. |
 
 <a name="Prover+update"></a>
@@ -215,19 +218,31 @@ accumulation.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| updateOrWitness | <code>Update</code> \| <code>Witness</code> | An update or witness object returned from [Accumulator.add](#Accumulator+add) or [Accumulator.del](#Accumulator+del). |
+| updateOrWitness | [<code>Update</code>](#Update) \| [<code>Witness</code>](#Witness) | An update or witness object returned from [Accumulator.add](#Accumulator+add) or [Accumulator.del](#Accumulator+del). |
 
 <a name="Prover+prove"></a>
 
-### prover.prove(d) ⇒ <code>Witness</code>
+### prover.prove(d) ⇒ [<code>Witness</code>](#Witness)
 Compute a proof of membership for an element.
 
 **Kind**: instance method of [<code>Prover</code>](#Prover)  
-**Returns**: <code>Witness</code> - An object containing the element and its witness.
+**Returns**: [<code>Witness</code>](#Witness) - An object containing the element and its witness.
 This object can be passed to [Accumulator.verify](#Accumulator+verify) to verify membership,
 or to [Accumulator.del](#Accumulator+del) to delete the element.  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | d | <code>String</code> \| <code>Buffer</code> | The element to add. |
+
+<a name="Prover+verify"></a>
+
+### prover.verify(updateOrWitness) ⇒ <code>Boolean</code>
+Verify an element is a member of the accumulation.
+
+**Kind**: instance method of [<code>Prover</code>](#Prover)  
+**Returns**: <code>Boolean</code> - True if element is a member of the accumulation; false otherwise.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| updateOrWitness | [<code>Update</code>](#Update) \| [<code>Witness</code>](#Witness) | An update object returned from [Accumulator.add](#Accumulator+add) or a witness object returned from [Prover.prove](#Prover+prove). |
 

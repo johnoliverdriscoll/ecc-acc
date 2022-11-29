@@ -17,9 +17,6 @@ class Accumulator {
    */
   constructor({infinity, G, n}, H, c) {
     tf(tf.tuple(type.Curve, type.Hash, tf.maybe(type.BigInteger)), arguments)
-    if (typeof(H) === 'string') {
-      tf(tf.oneOf(...crypto.getHashes().map(hash => tf.value(hash))), H)
-    }
     this.infinity = infinity
     this.G = G
     this.n = n
@@ -42,19 +39,18 @@ class Accumulator {
     // Map data to e in Zq.
     const e = map(this.H, d, this.n)
     // Create witness before updating z.
-    const w = this.z
+    const v = this.z
+    const w = this.z.multiply(this.c)
     // Update z' = z ^ ((e + c) mod n).
     this.z = this.z.multiply(e.add(this.c).mod(this.n))
     // If Q is the point at infinity, Q = G, otherwise Q = Q ^ c.
     this.Q = this.Q.equals(this.infinity) ? this.G : this.Q.multiply(this.c)
-    // If i is null, i = 0, otherwise i + 1.
+    const Q = this.Q.multiply(this.c)
+    // If i is Null, i = 0, otherwise i + 1.
     this.i = this.i === null ? 0 : this.i + 1
     // Create public component.
-    const Qi = {
-      Q: this.Q,
-      i: this.i,
-    }
-    return {d, w, Qi}
+    const {z, i} = this
+    return {d, z, v, w, Q, i}
   }
 
   /**
@@ -65,24 +61,22 @@ class Accumulator {
    * @returns {Update} The updated public component. This object can be passed to
    * [Prover.update](#Prover+update).
    */
-  del({d, w}) {
+  del({d, v, w}) {
     tf(tf.tuple(type.Witness), arguments)
     // Verify element is a member.
-    assert(this.verify({d, w}), 'Accumulator does not contain d')
+    assert(this.verify({d, v, w}), 'Accumulator does not contain d')
     // Map data to e in Zq.
     const e = map(this.H, d, this.n)
     // Update z' = z ^ ((e + c)^-1 mod n).
     this.z = this.z.multiply(e.add(this.c).mod(this.n).modInverse(this.n))
     // If Q is G, Q = the point at infinity, otherwise Q = G ^ (c ^ -1).
+    const Q = this.Q
     this.Q = this.Q.equals(this.G) ? this.infinity : this.Q.multiply(this.c.modInverse(this.n))
-    // If i is 0, i = null, otherwise i = i - 1.
+    // If i is 0, i = Null, otherwise i = i - 1.
     this.i = this.i === 0 ? null : this.i - 1
     // Create public component.
-    const Qi = {
-      Q: this.Q,
-      i: this.i,
-    }
-    return {d, Qi}
+    const {z, i} = this
+    return {d, z, Q, i}
   }
 
   /**
@@ -92,12 +86,12 @@ class Accumulator {
    * [Prover.prove](#Prover+prove).
    * @returns {Boolean} True if element is a member of the accumulation; false otherwise.
    */
-  verify({d, w}) {
+  verify({d, v, w}) {
     tf(tf.tuple(type.Witness), arguments)
     // Map data to e in Zq.
     const e = map(this.H, d, this.n)
-    // Compare z and w ^ (map(e) + c mod n)
-    return this.z.equals(w.multiply(e.add(this.c).mod(this.n)))
+    // Compare z and (v ^ map(e)) * w
+    return this.z.equals(v.multiply(e).add(w))
   }
 
 }
@@ -111,7 +105,7 @@ class Prover {
    * @param {(String|Function)} H The name of a hash algorithm or a function that produces a
    * digest for an input String or Buffer.
    */
-  constructor({infinity, n}, H) {
+  constructor({infinity, G, n}, H) {
     tf(tf.tuple(type.Curve, type.Hash), arguments)
     if (typeof(H) === 'string') {
       tf(tf.oneOf(...crypto.getHashes().map(hash => tf.value(hash))), H)
@@ -120,8 +114,9 @@ class Prover {
     this.n = n
     this.H = H
     this.A = []
-    this.Q = []
+    this.Q = [G]
     this.i = null
+    this.z = undefined
   }
 
   /**
@@ -130,7 +125,7 @@ class Prover {
    * @param {(Update|Witness)} updateOrWitness An update or witness object returned from
    * [Accumulator.add](#Accumulator+add) or [Accumulator.del](#Accumulator+del).
    */
-  update({d, Qi: {Q, i}}) {
+  update({d, z, Q, i}) {
     tf(tf.tuple(type.Update), arguments)
     // Map data to e in Zq.
     const e = map(this.H, d, this.n)
@@ -141,12 +136,16 @@ class Prover {
       // Add element.
       this.A.push(e)
     }
-    // Update public component.
-    if (i !== null) {
-      this.Q[i] = Q
+    // Add public component.
+    if (i === null) {
+      this.Q[1] = Q
+    } else {
+      this.Q[i + 1] = Q
     }
     // Update i.
     this.i = i
+    // Update accumulation.
+    this.z = z
   }
 
   /**
@@ -170,10 +169,28 @@ class Prover {
       }, bn.ZERO))
     }
     // Compute product of coefficients and Qis.
-    const w = this.Q.slice(0, this.i + 1).reverse().reduce((w, Q, i) => {
-      return w.add(Q.multiply(coefficients[i]))
-    }, this.infinity)
-    return {d, w}
+    let v = this.infinity
+    let w = this.infinity
+    for (let i = 0; i <= this.i; i++) {
+      v = v.add(this.Q[this.i - i + 0].multiply(coefficients[i]))
+      w = w.add(this.Q[this.i - i + 1].multiply(coefficients[i]))
+    }
+    return {d, v, w}
+  }
+
+  /**
+   * Verify an element is a member of the accumulation.
+   * @param {(Update|Witness)} updateOrWitness An update object returned from
+   * [Accumulator.add](#Accumulator+add) or a witness object returned from
+   * [Prover.prove](#Prover+prove).
+   * @returns {Boolean} True if element is a member of the accumulation; false otherwise.
+   */
+  verify({d, v, w}) {
+    tf(tf.tuple(type.Witness), arguments)
+    // Map data to e in Zq.
+    const e = map(this.H, d, this.n)
+    // Compare z and (v ^ map(e)) * w
+    return this.z.equals(v.multiply(e).add(w))
   }
 
 }
