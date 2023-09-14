@@ -33,7 +33,7 @@ describe('accumulator over secp256k1', function() {
         const items = ['a', 'b', 'c']
 
         it('accumulates values', async function() {
-          for (item of items) {
+          for (let item of items) {
             const update = await accumulator.add(item)
             update.should.have.property('v').which.is.an.instanceOf(curve.ProjectivePoint)
             update.should.have.property('w').which.is.an.instanceOf(curve.ProjectivePoint)
@@ -56,18 +56,18 @@ describe('accumulator over secp256k1', function() {
         const updates = []
 
         before('accumulates values', async function() {
-          for (item of items) {
+          for (let item of items) {
             updates.push(await accumulator.add(item))
           }
         })
 
         it('deletes elements', async function() {
-          for (update of updates.reverse()) {
+          for (let update of updates.reverse()) {
             await accumulator.del(update)
           }
           accumulator.should.have.property('i').which.is.null()
           accumulator.Q.should.equal(curve.ProjectivePoint.ZERO)
-          for (update of updates) {
+          for (let update of updates) {
             await accumulator.verify(update).should.be.fulfilledWith(false)
           }
         })
@@ -106,17 +106,17 @@ describe('accumulator over secp256k1', function() {
         const items = ['a', 'b', 'c']
 
         before('accumulates values', async function() {
-          for (item of items) {
+          for (let item of items) {
             await accumulator.add(item)
           }
         })
 
         it('proves item', async function() {
           const witnesses = []
-          for (item of items) {
+          for (let item of items) {
             witnesses.push(await accumulator.prove(item))
           }
-          for (witness of witnesses) {
+          for (let witness of witnesses) {
             await accumulator.verify(witness).should.be.fulfilledWith(true)
           }
         })
@@ -152,13 +152,13 @@ describe('accumulator over secp256k1', function() {
           const updates = []
 
           before('accumulates values', async function() {
-            for (item of items) {
+            for (let item of items) {
               updates.push(await accumulator.add(item))
             }
           })
 
           it('updates prover', async function() {
-            for (update of updates) {
+            for (let update of updates) {
               await prover.update(update)
             }
             prover.A.length.should.equal(3)
@@ -184,20 +184,20 @@ describe('accumulator over secp256k1', function() {
           const updates = []
 
           before('accumulates values', async function() {
-            for (item of items) {
+            for (let item of items) {
               updates.push(await accumulator.add(item))
             }
           })
 
           before('updates prover', async function() {
-            for (update of updates) {
+            for (let update of updates) {
               await prover.update(update)
             }
           })
 
           it('computes witnesses', async function() {
             const witnesses = []
-            for (item of items) {
+            for (let item of items) {
               witnesses.push(await prover.prove(item))
             }
             for (let i = 0; i < items.length; i++) {
@@ -228,13 +228,13 @@ describe('accumulator over secp256k1', function() {
           const updates = []
 
           before('accumulates values', async function() {
-            for (item of items) {
+            for (let item of items) {
               updates.push(await accumulator.add(item))
             }
           })
 
           before('updates prover', async function() {
-            for (update of updates) {
+            for (let update of updates) {
               await prover.update(update)
             }
           })
@@ -269,13 +269,13 @@ describe('accumulator over secp256k1', function() {
           const updates = []
 
           before('accumulates values', async function() {
-            for (item of items) {
+            for (let item of items) {
               updates.push(await accumulator.add(item))
             }
           })
 
           before('updates prover', async function() {
-            for (update of updates) {
+            for (let update of updates) {
               await prover.update(update)
             }
           })
@@ -283,13 +283,13 @@ describe('accumulator over secp256k1', function() {
           const witnesses = []
 
           before('computes witnesses', async function() {
-            for (item of items) {
+            for (let item of items) {
               witnesses.push(await prover.prove(item))
             }
           })
 
           it('verifies witnesses', async function() {
-            for (witness of witnesses) {
+            for (let witness of witnesses) {
               await prover.verify(witness).should.be.fulfilledWith(true)
             }
           })
@@ -308,14 +308,14 @@ describe('accumulator over secp256k1', function() {
       it('accumulates, proves, and verifies', async function() {
         const accumulator = new Accumulator(curve, hash)
         const prover = new Prover(curve, hash)
-        for (item of items) {
+        for (let item of items) {
           await prover.update(await accumulator.add(item))
         }
         const witnesses = []
-        for (item of items) {
+        for (let item of items) {
           witnesses.push(await prover.prove(item))
         }
-        for (witness of witnesses) {
+        for (let witness of witnesses) {
           await accumulator.verify(witness).should.be.fulfilledWith(true)
         }
       })
@@ -333,14 +333,14 @@ describe('accumulator over secp256k1', function() {
       const items = ['d', 'e', 'f']
       const accumulator = new Accumulator(curve, hash)
       const prover = new Prover(curve, hash)
-      for (item of items) {
+      for (let item of items) {
         await prover.update(await accumulator.add(item))
       }
       const witnesses = []
-      for (item of items) {
+      for (let item of items) {
         witnesses.push(await prover.prove(item))
       }
-      for (witness of witnesses) {
+      for (let witness of witnesses) {
         await accumulator.verify(witness).should.be.fulfilledWith(true)
       }
     })
