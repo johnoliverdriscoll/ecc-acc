@@ -9,7 +9,7 @@ to all previously accumulated values.
 * __Constant size accumulation__: Components of the accumulation are constant size.
 * __Trustless proofs__: An untrusted prover may compute a witness of membership
 for any accumulated element without knowledge of any sensitive information.
-* ~~Constant time witness updates~~: Trustless witness updates are O(n^2).
+* ~~Constant time witness updates~~: Trustless witness updates are $O(n^2)$.
 
 ## Setup
 
