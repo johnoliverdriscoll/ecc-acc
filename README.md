@@ -1,8 +1,6 @@
 # ecc-acc
 
-This is an implementation of [An Accumulator Based on Bilinear Maps and Efficient
-Revocation for Anonymous Credentials](https://eprint.iacr.org/2008/539.pdf). It is
-a proof-of-concept cryptographic accumulator over elliptic curves.
+This is an implementation of a cryptographic accumulator over elliptic curves.
 
 Features:
 
@@ -30,12 +28,10 @@ requires the parameters for an elliptic curve and an optional secret (a random s
 is generated if you do not give it one).
 
 ```javascript
-// Import an underlying elliptic curve library.
-const ec = require('ecurve')
-// Generate parameters for a curve.
-const curve = ec.getCurveByName('secp256k1')
+// Import an underlying elliptic curve.
+const curve = require('@noble/curves/secp256k1')
 // An algorithm used to map data to elements in Z_q.
-const hash = 'sha256'
+const hash = 'SHA-256'
 // Construct a trusted accumulator.
 const accumulator = new Accumulator(curve, hash)
 ```
@@ -55,9 +51,9 @@ its membership later.
 ```javascript
 // Add an element.
 const d1 = '1'
-const u1 = accumulator.add(d1)
+const u1 = await accumulator.add(d1)
 // Verify the result.
-assert(accumulator.verify(u1))
+assert(await accumulator.verify(u1))
 ```
 
 The object returned from [Accumulator.add](#Accumulator+add) contains information that
@@ -65,7 +61,7 @@ the prover requires to compute witnesses. Pass it to [Prover.update](#Prover+upd
 
 ```javascript
 // Update the prover with the result.
-prover.update(u1)
+await prover.update(u1)
 ```
 
 Subsequent additions of elements invalidate the previously returned witnesses. 
@@ -73,11 +69,11 @@ Subsequent additions of elements invalidate the previously returned witnesses.
 ```javascript
 // Add a new element.
 const d2 = '2'
-const u2 = accumulator.add(d2)
+const u2 = await accumulator.add(d2)
 // Verify the result.
-assert(accumulator.verify(u2))
+assert(await accumulator.verify(u2))
 // Demonstrate that the witness for d1 is no longer valid.
-assert(accumulator.verify(u1) === false)
+assert(await accumulator.verify(u1) === false)
 ```
 
 As long as the prover is kept updated, it can compute valid witnesses for any
@@ -85,40 +81,40 @@ accumulated element.
 
 ```javascript
 // Update the prover with the result.
-prover.update(u2)
+await prover.update(u2)
 // Compute a new witness for d1.
-const w1 = prover.prove(d1)
+const w1 = await prover.prove(d1)
 // Verify the result.
-assert(accumulator.verify(w1))
+assert(await accumulator.verify(w1))
 ```
 
 An element can be deleted from the accumulator, which invalidates its witness.
 
 ```javascript
 // Delete d1 from the accumulator.
-const u3 = accumulator.del(w1)
+const u3 = await accumulator.del(w1)
 // Demonstrate that the original witness is no longer valid.
-assert(accumulator.verify(w1) === false)
+assert(await accumulator.verify(w1) === false)
 ```
 
 The prover must be updated after a deletion as well.
 
 ```javascript
 // Update prover with the result.
-prover.update(u3)
+await prover.update(u3)
 // Compute a new witness for d2.
-const w2 = prover.prove(d2)
+const w2 = await prover.prove(d2)
 // Verify the result.
-assert(accumulator.verify(w2))
+assert(await accumulator.verify(w2))
 ```
 
 It will not, however, be able to prove the membership of deleted elements.
 
 ```javascript
 // Compute a new witness for the deleted element.
-const w3 = prover.prove(d1)
+const w3 = await prover.prove(d1)
 // Demonstrate that the new witness is not valid either.
-assert(accumulator.verify(w3) === false)
+assert(await accumulator.verify(w3) === false)
 ```
 
 # API Reference
@@ -144,7 +140,7 @@ can modify the accumulation of member elements.
 | --- | --- | --- |
 | curve | [<code>Curve</code>](#Curve) | An object containing the curve parameters. |
 | H | <code>String</code> \| <code>function</code> | The name of a hash algorithm or a function that returns a digest for an input String or Buffer. |
-| [c] | [<code>BigInteger</code>](#BigInteger) | An optional secret. If not provided, a random secret is generated. |
+| [c] | [<code>BigInt</code>](#BigInt) | An optional secret. If not provided, a random secret is generated. |
 
 <a name="Accumulator+add"></a>
 
@@ -158,7 +154,7 @@ public component. This object can be passed to [Prover.update](#Prover+update),
 
 | Param | Type | Description |
 | --- | --- | --- |
-| d | <code>String</code> \| <code>Buffer</code> | The element to add. |
+| d | <code>Data</code> | The element to add. |
 
 <a name="Accumulator+del"></a>
 
@@ -232,7 +228,7 @@ or to [Accumulator.del](#Accumulator+del) to delete the element.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| d | <code>String</code> \| <code>Buffer</code> | The element to add. |
+| d | <code>Data</code> | The element to add. |
 
 <a name="Prover+verify"></a>
 

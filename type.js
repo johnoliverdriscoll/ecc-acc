@@ -3,26 +3,27 @@ const crypto = require('crypto')
 const tf = require('typeforce')
 
 /**
- * @typedef {Object} BigInteger
+ * @typedef {Object} BigInt
  */
-const BigInteger = tf.quacksLike('BigInteger')
+function BigInt(x) {
+  return typeof x === 'bigint'
+}
+BigInt.toJSON = () => 'bigint'
 
 /**
  * @typedef {Object} Curve
- * @property {Point} infinity The point at infinity.
- * @property {Point} G The curve generator point.
- * @property {BigInteger} n The order of the curve.
  */
-const Curve = tf.quacksLike('Curve')
+const Curve = tf.object({
+  ProjectivePoint: tf.Function,
+  CURVE: {n: BigInt},
+})
 
 const Data = tf.oneOf(tf.String, tf.Buffer)
 
-const Hash = tf.oneOf(tf.Function, ...crypto.getHashes().map(hash => tf.value(hash)))
+const Hash = tf.oneOf(tf.String, tf.Function)
 
 /**
  * @typedef {Object} Point
- * @property {BigInteger} x The x coordinate.
- * @property {BigInteger} y The y coordinate.
  */
 const Point = tf.quacksLike('Point')
 
@@ -53,7 +54,7 @@ const Witness = tf.object({
 })
 
 module.exports = {
-  BigInteger,
+  BigInt,
   Curve,
   Data,
   Hash,
