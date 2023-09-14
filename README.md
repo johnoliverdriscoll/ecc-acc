@@ -119,8 +119,35 @@ assert(await accumulator.verify(w3) === false)
 
 # API Reference
 
-## Accumulator
+## Classes
 
+<dl>
+<dt><a href="#Accumulator">Accumulator</a></dt>
+<dd></dd>
+<dt><a href="#Prover">Prover</a></dt>
+<dd></dd>
+</dl>
+
+## Typedefs
+
+<dl>
+<dt><a href="#BigInt">BigInt</a> : <code>Object</code></dt>
+<dd></dd>
+<dt><a href="#Curve">Curve</a> : <code>Object</code></dt>
+<dd></dd>
+<dt><a href="#Point">Point</a> : <code>Object</code></dt>
+<dd></dd>
+<dt><a href="#Update">Update</a> : <code>Object</code></dt>
+<dd></dd>
+<dt><a href="#Witness">Witness</a> : <code>Object</code></dt>
+<dd></dd>
+<dt><a href="#WitnessUpdate">WitnessUpdate</a> : <code>Object</code></dt>
+<dd></dd>
+</dl>
+
+<a name="Accumulator"></a>
+
+## Accumulator
 **Kind**: global class  
 
 * [Accumulator](#Accumulator)
@@ -191,9 +218,9 @@ Compute a proof of membership for an element.
 | --- | --- | --- |
 | d | <code>Data</code> | The element to prove. |
 
+<a name="Prover"></a>
 
 ## Prover
-
 **Kind**: global class  
 
 * [Prover](#Prover)
@@ -249,4 +276,56 @@ Verify an element is a member of the accumulation.
 | Param | Type | Description |
 | --- | --- | --- |
 | updateOrWitness | [<code>Witness</code>](#Witness) \| [<code>WitnessUpdate</code>](#WitnessUpdate) | An update or witness. |
+
+<a name="BigInt"></a>
+
+## BigInt : <code>Object</code>
+**Kind**: global typedef  
+<a name="Curve"></a>
+
+## Curve : <code>Object</code>
+**Kind**: global typedef  
+<a name="Point"></a>
+
+## Point : <code>Object</code>
+**Kind**: global typedef  
+<a name="Update"></a>
+
+## Update : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| d | <code>String</code> \| <code>Buffer</code> | The element. |
+| z | [<code>Point</code>](#Point) | The current accumulation. |
+| Q | [<code>Point</code>](#Point) | The public component. |
+| i | <code>Number</code> | The index. |
+
+<a name="Witness"></a>
+
+## Witness : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| d | <code>String</code> \| <code>Buffer</code> | The element. |
+| v | [<code>Point</code>](#Point) | The previous accumulation. |
+| w | [<code>Point</code>](#Point) | The previous accumulation raised to the secret value. |
+
+<a name="WitnessUpdate"></a>
+
+## WitnessUpdate : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| d | <code>String</code> \| <code>Buffer</code> | The element. |
+| z | [<code>Point</code>](#Point) | The current accumulation. |
+| v | [<code>Point</code>](#Point) | The previous accumulation. |
+| w | [<code>Point</code>](#Point) | The previous accumulation raised to the secret value. |
+| Q | [<code>Point</code>](#Point) | The public component. |
+| i | <code>Number</code> | The index. |
 
