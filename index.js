@@ -12,7 +12,7 @@ class Accumulator {
    * Creates a new Accumulator instance. An Accumulator is a trusted party that stores a secret and
    * can modify the accumulation of member elements.
    * @param {Curve} curve An object containing the curve parameters.
-   * @param {(String|Function)} H The name of a hash algorithm or a function that returns a digest
+   * @param {(String|function)} H The name of a hash algorithm or a function that returns a digest
    * for an input String or Buffer.
    * @param {BigInt} [c] An optional secret. If not provided, a random secret is generated.
    */
@@ -109,7 +109,7 @@ class Prover {
    * Creates a prover. A Prover is an untrusted party that receives update information from the
    * Accumulator and can compute witnesses for elements based on that information.
    * @param {Curve} curve An object containing the curve parameters.
-   * @param {(String|Function)} H The name of a hash algorithm or a function that produces a
+   * @param {(String|function)} H The name of a hash algorithm or a function that produces a
    * digest for an input String or Buffer.
    */
   constructor(curve, H) {
@@ -206,7 +206,7 @@ function bufferToHex(buffer) {
 
 /**
  * Maps some data to an element in the set Zq.
- * @param {String|Function} H A hash function.
+ * @param {String|function} H A hash function.
  * @param {Data} d The data to be mapped.
  * @param {BigInt} The group order of the curve.
  * @returns {Promise<BigInt>} The mapped element.
