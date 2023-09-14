@@ -1,6 +1,6 @@
 {
   "name": "ecc-acc",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Elliptic curve accumulator",
   "main": "index.js",
   "directories": {
