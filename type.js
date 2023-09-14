@@ -79,4 +79,5 @@ module.exports = {
   Point,
   Update,
   Witness,
+  WitnessUpdate,
 }
