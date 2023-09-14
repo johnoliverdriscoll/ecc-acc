@@ -125,9 +125,9 @@ assert(await accumulator.verify(w3) === false)
 
 * [Accumulator](#Accumulator)
     * [new Accumulator(curve, H, [c])](#new_Accumulator_new)
-    * [.add(d)](#Accumulator+add) ⇒ [<code>Witness</code>](#Witness)
-    * [.del(update)](#Accumulator+del) ⇒ [<code>Update</code>](#Update)
-    * [.verify(updateOrWitness)](#Accumulator+verify) ⇒ <code>Boolean</code>
+    * [.add(d)](#Accumulator+add) ⇒ [<code>Promise.&lt;Witness&gt;</code>](#Witness)
+    * [.del(update)](#Accumulator+del) ⇒ [<code>Promise.&lt;Update&gt;</code>](#Update)
+    * [.verify(updateOrWitness)](#Accumulator+verify) ⇒ <code>Promise.&lt;Boolean&gt;</code>
 
 <a name="new_Accumulator_new"></a>
 
@@ -144,11 +144,11 @@ can modify the accumulation of member elements.
 
 <a name="Accumulator+add"></a>
 
-### accumulator.add(d) ⇒ [<code>Witness</code>](#Witness)
+### accumulator.add(d) ⇒ [<code>Promise.&lt;Witness&gt;</code>](#Witness)
 Add an element to the accumulation.
 
 **Kind**: instance method of [<code>Accumulator</code>](#Accumulator)  
-**Returns**: [<code>Witness</code>](#Witness) - An update object that includes the data added, its witness, and the
+**Returns**: [<code>Promise.&lt;Witness&gt;</code>](#Witness) - An update object that includes the data added, its witness, and the
 public component. This object can be passed to [Prover.update](#Prover+update),
 [Accumulator.verify](#Accumulator+update), and [Accumulator.del](#Accumulator+del).  
 
@@ -158,11 +158,11 @@ public component. This object can be passed to [Prover.update](#Prover+update),
 
 <a name="Accumulator+del"></a>
 
-### accumulator.del(update) ⇒ [<code>Update</code>](#Update)
+### accumulator.del(update) ⇒ [<code>Promise.&lt;Update&gt;</code>](#Update)
 Delete an element from the accumulation.
 
 **Kind**: instance method of [<code>Accumulator</code>](#Accumulator)  
-**Returns**: [<code>Update</code>](#Update) - The updated public component. This object can be passed to
+**Returns**: [<code>Promise.&lt;Update&gt;</code>](#Update) - The updated public component. This object can be passed to
 [Prover.update](#Prover+update).  
 
 | Param | Type | Description |
@@ -171,11 +171,11 @@ Delete an element from the accumulation.
 
 <a name="Accumulator+verify"></a>
 
-### accumulator.verify(updateOrWitness) ⇒ <code>Boolean</code>
+### accumulator.verify(updateOrWitness) ⇒ <code>Promise.&lt;Boolean&gt;</code>
 Verify an element is a member of the accumulation.
 
 **Kind**: instance method of [<code>Accumulator</code>](#Accumulator)  
-**Returns**: <code>Boolean</code> - True if element is a member of the accumulation; false otherwise.  
+**Returns**: <code>Promise.&lt;Boolean&gt;</code> - True if element is a member of the accumulation; false otherwise.  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -189,8 +189,8 @@ Verify an element is a member of the accumulation.
 * [Prover](#Prover)
     * [new Prover(curve, H)](#new_Prover_new)
     * [.update(updateOrWitness)](#Prover+update)
-    * [.prove(d)](#Prover+prove) ⇒ [<code>Witness</code>](#Witness)
-    * [.verify(updateOrWitness)](#Prover+verify) ⇒ <code>Boolean</code>
+    * [.prove(d)](#Prover+prove) ⇒ [<code>Promise.&lt;Witness&gt;</code>](#Witness)
+    * [.verify(updateOrWitness)](#Prover+verify) ⇒ <code>Promise.&lt;Boolean&gt;</code>
 
 <a name="new_Prover_new"></a>
 
@@ -218,11 +218,11 @@ accumulation.
 
 <a name="Prover+prove"></a>
 
-### prover.prove(d) ⇒ [<code>Witness</code>](#Witness)
+### prover.prove(d) ⇒ [<code>Promise.&lt;Witness&gt;</code>](#Witness)
 Compute a proof of membership for an element.
 
 **Kind**: instance method of [<code>Prover</code>](#Prover)  
-**Returns**: [<code>Witness</code>](#Witness) - An object containing the element and its witness.
+**Returns**: [<code>Promise.&lt;Witness&gt;</code>](#Witness) - An object containing the element and its witness.
 This object can be passed to [Accumulator.verify](#Accumulator+verify) to verify membership,
 or to [Accumulator.del](#Accumulator+del) to delete the element.  
 
@@ -232,11 +232,11 @@ or to [Accumulator.del](#Accumulator+del) to delete the element.
 
 <a name="Prover+verify"></a>
 
-### prover.verify(updateOrWitness) ⇒ <code>Boolean</code>
+### prover.verify(updateOrWitness) ⇒ <code>Promise.&lt;Boolean&gt;</code>
 Verify an element is a member of the accumulation.
 
 **Kind**: instance method of [<code>Prover</code>](#Prover)  
-**Returns**: <code>Boolean</code> - True if element is a member of the accumulation; false otherwise.  
+**Returns**: <code>Promise.&lt;Boolean&gt;</code> - True if element is a member of the accumulation; false otherwise.  
 
 | Param | Type | Description |
 | --- | --- | --- |

@@ -31,7 +31,7 @@ class Accumulator {
   /**
    * Add an element to the accumulation.
    * @param {Data} d The element to add.
-   * @returns {Witness} An update object that includes the data added, its witness, and the
+   * @returns {Promise<Witness>} An update object that includes the data added, its witness, and the
    * public component. This object can be passed to [Prover.update](#Prover+update),
    * [Accumulator.verify](#Accumulator+update), and [Accumulator.del](#Accumulator+del).
    */
@@ -59,7 +59,7 @@ class Accumulator {
    * @param {Witness} update An object previously returned from
    * [Accumulator.add](#Accumulator+add), [Accumulator.del](#Accumulator+del), or
    * [Prover.prove](#Prover+prove).
-   * @returns {Update} The updated public component. This object can be passed to
+   * @returns {Promise<Update>} The updated public component. This object can be passed to
    * [Prover.update](#Prover+update).
    */
   async del({d, v, w}) {
@@ -85,7 +85,7 @@ class Accumulator {
    * @param {(Update|Witness)} updateOrWitness An update object returned from
    * [Accumulator.add](#Accumulator+add) or a witness object returned from
    * [Prover.prove](#Prover+prove).
-   * @returns {Boolean} True if element is a member of the accumulation; false otherwise.
+   * @returns {Promise<Boolean>} True if element is a member of the accumulation; false otherwise.
    */
   async verify({d, v, w}) {
     tf(tf.tuple(type.Witness), arguments)
@@ -149,7 +149,7 @@ class Prover {
   /**
    * Compute a proof of membership for an element.
    * @param {Data} d The element to add.
-   * @returns {Witness} An object containing the element and its witness.
+   * @returns {Promise<Witness>} An object containing the element and its witness.
    * This object can be passed to [Accumulator.verify](#Accumulator+verify) to verify membership,
    * or to [Accumulator.del](#Accumulator+del) to delete the element.
    */
@@ -181,7 +181,7 @@ class Prover {
    * @param {(Update|Witness)} updateOrWitness An update object returned from
    * [Accumulator.add](#Accumulator+add) or a witness object returned from
    * [Prover.prove](#Prover+prove).
-   * @returns {Boolean} True if element is a member of the accumulation; false otherwise.
+   * @returns {Promise<Boolean>} True if element is a member of the accumulation; false otherwise.
    */
   async verify({d, v, w}) {
     tf(tf.tuple(type.Witness), arguments)
@@ -193,6 +193,12 @@ class Prover {
 
 }
 
+/**
+ * Return a hex string representing the data in a buffer.
+ * @param {Buffer} buffer The buffer to hexlify.
+ * @returns {String} The hex representation of the buffer.
+ * @private
+ */
 function bufferToHex(buffer) {
   return [...new Uint8Array(buffer)].map(x => x.toString(16).padStart(2, '0')).join('')
 }
@@ -202,7 +208,7 @@ function bufferToHex(buffer) {
  * @param {String|Function} H A hash function.
  * @param {Data} d The data to be mapped.
  * @param {BigInt} The group order of the curve.
- * @returns {BigInt} The mapped element.
+ * @returns {Promise<BigInt>} The mapped element.
  * @private
  */
 async function map(H, d, n) {
