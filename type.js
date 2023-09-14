@@ -29,7 +29,7 @@ const Point = tf.quacksLike('Point')
 
 /**
  * @typedef {Object} Update
- * @property {(String|Buffer)} The element.
+ * @property {(String|Buffer)} d The element.
  * @property {Point} z The current accumulation.
  * @property {Point} Q The public component.
  * @property {Number} i The index.
@@ -52,6 +52,24 @@ const Witness = tf.object({
   v: Point,
   w: Point,
 })
+
+/**
+ * @typedef {Object} WitnessUpdate
+ * @property {(String|Buffer)} d The element.
+ * @property {Point} z The current accumulation.
+ * @property {Point} v The previous accumulation.
+ * @property {Point} w The previous accumulation raised to the secret value.
+ * @property {Point} Q The public component.
+ * @property {Number} i The index.
+ */
+const WitnessUpdate = tf.object({
+  d: Data,
+  z: Point,
+  v: Point,
+  w: Point,
+  Q: Point,
+  i: tf.oneOf(tf.Null, tf.Number),
+})  
 
 module.exports = {
   BigInt,

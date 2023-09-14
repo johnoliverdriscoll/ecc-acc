@@ -31,9 +31,7 @@ class Accumulator {
   /**
    * Add an element to the accumulation.
    * @param {Data} d The element to add.
-   * @returns {Promise<Witness>} An update object that includes the data added, its witness, and the
-   * public component. This object can be passed to [Prover.update](#Prover+update),
-   * [Accumulator.verify](#Accumulator+update), and [Accumulator.del](#Accumulator+del).
+   * @returns {Promise<WitnessUpdate>} A witness of the element's membership.
    */
   async add(d) {
     tf(tf.tuple(type.Data), arguments)
@@ -56,11 +54,8 @@ class Accumulator {
 
   /**
    * Delete an element from the accumulation.
-   * @param {Witness} update An object previously returned from
-   * [Accumulator.add](#Accumulator+add), [Accumulator.del](#Accumulator+del), or
-   * [Prover.prove](#Prover+prove).
-   * @returns {Promise<Update>} The updated public component. This object can be passed to
-   * [Prover.update](#Prover+update).
+   * @param {(Witness|WitnessUpdate)} witness A witness of the element's membership.
+   * @returns {Promise<Update>} The updated public component.
    */
   async del({d, v, w}) {
     tf(tf.tuple(type.Witness), arguments)
@@ -69,7 +64,7 @@ class Accumulator {
     // Map data to e in Zq.
     const e = await map(this.H, d, this.n)
     // Update z' = z ^ ((e + c)^-1 mod n).
-    this.z = this.z.multiply(modInv(e + this.c, this.n))
+    this.z = this.z.multiply(modInv((e + this.c) % this.n, this.n))
     // If Q is g, Q = the point at infinity, otherwise Q = g ^ (c ^ -1).
     const Q = this.Q
     this.Q = this.Q.equals(this.g) ? this.inf : this.Q.multiply(modInv(this.c, this.n))
@@ -82,17 +77,28 @@ class Accumulator {
 
   /**
    * Verify an element is a member of the accumulation.
-   * @param {(Update|Witness)} updateOrWitness An update object returned from
-   * [Accumulator.add](#Accumulator+add) or a witness object returned from
-   * [Prover.prove](#Prover+prove).
+   * @param {(Witness|WitnessUpdate)} witness A witness of the element's membership.
    * @returns {Promise<Boolean>} True if element is a member of the accumulation; false otherwise.
    */
-  async verify({d, v, w}) {
+  async verify({d, v}) {
     tf(tf.tuple(type.Witness), arguments)
     // Map data to e in Zq.
     const e = await map(this.H, d, this.n)
-    // Compare z and (v ^ map(e)) * w
-    return this.z.equals(v.multiply(e).add(w))
+    // Compare z and v ^ (map(e) + c mod n)
+    return this.z.equals(v.multiply((e + this.c) % this.n))
+  }
+
+  /**
+   * Compute a proof of membership for an element.
+   * @param {Data} d The element to prove.
+   * @returns {Promise<Witness>} A witness of the element's membership.
+   */
+  async prove(d) {
+    tf(tf.tuple(type.Data), arguments)
+    const e = await map(this.H, d, this.n)
+    const v = this.z.multiply(modInv((e + this.c) % this.n, this.n))
+    const w = this.z.multiply(modInv(e, this.n))
+    return {d, v, w}
   }
 
 }
@@ -120,8 +126,7 @@ class Prover {
   /**
    * Update membership data. This must be called after any element is added or deleted from the
    * accumulation.
-   * @param {(Update|Witness)} updateOrWitness An update or witness object returned from
-   * [Accumulator.add](#Accumulator+add) or [Accumulator.del](#Accumulator+del).
+   * @param {(Update|WitnessUpdate)} updateOrWitness An update or witness.
    */
   async update({d, z, Q, i}) {
     tf(tf.tuple(type.Update), arguments)
@@ -148,10 +153,8 @@ class Prover {
 
   /**
    * Compute a proof of membership for an element.
-   * @param {Data} d The element to add.
-   * @returns {Promise<Witness>} An object containing the element and its witness.
-   * This object can be passed to [Accumulator.verify](#Accumulator+verify) to verify membership,
-   * or to [Accumulator.del](#Accumulator+del) to delete the element.
+   * @param {Data} d The element to prove.
+   * @returns {Promise<Witness>} A witness of the element's membership.
    */
   async prove(d) {
     tf(tf.tuple(type.Data), arguments)
@@ -178,9 +181,7 @@ class Prover {
 
   /**
    * Verify an element is a member of the accumulation.
-   * @param {(Update|Witness)} updateOrWitness An update object returned from
-   * [Accumulator.add](#Accumulator+add) or a witness object returned from
-   * [Prover.prove](#Prover+prove).
+   * @param {(Witness|WitnessUpdate)} updateOrWitness An update or witness.
    * @returns {Promise<Boolean>} True if element is a member of the accumulation; false otherwise.
    */
   async verify({d, v, w}) {

@@ -125,9 +125,10 @@ assert(await accumulator.verify(w3) === false)
 
 * [Accumulator](#Accumulator)
     * [new Accumulator(curve, H, [c])](#new_Accumulator_new)
-    * [.add(d)](#Accumulator+add) ⇒ [<code>Promise.&lt;Witness&gt;</code>](#Witness)
-    * [.del(update)](#Accumulator+del) ⇒ [<code>Promise.&lt;Update&gt;</code>](#Update)
-    * [.verify(updateOrWitness)](#Accumulator+verify) ⇒ <code>Promise.&lt;Boolean&gt;</code>
+    * [.add(d)](#Accumulator+add) ⇒ [<code>Promise.&lt;WitnessUpdate&gt;</code>](#WitnessUpdate)
+    * [.del(witness)](#Accumulator+del) ⇒ [<code>Promise.&lt;Update&gt;</code>](#Update)
+    * [.verify(witness)](#Accumulator+verify) ⇒ <code>Promise.&lt;Boolean&gt;</code>
+    * [.prove(d)](#Accumulator+prove) ⇒ [<code>Promise.&lt;Witness&gt;</code>](#Witness)
 
 <a name="new_Accumulator_new"></a>
 
@@ -144,13 +145,11 @@ can modify the accumulation of member elements.
 
 <a name="Accumulator+add"></a>
 
-### accumulator.add(d) ⇒ [<code>Promise.&lt;Witness&gt;</code>](#Witness)
+### accumulator.add(d) ⇒ [<code>Promise.&lt;WitnessUpdate&gt;</code>](#WitnessUpdate)
 Add an element to the accumulation.
 
 **Kind**: instance method of [<code>Accumulator</code>](#Accumulator)  
-**Returns**: [<code>Promise.&lt;Witness&gt;</code>](#Witness) - An update object that includes the data added, its witness, and the
-public component. This object can be passed to [Prover.update](#Prover+update),
-[Accumulator.verify](#Accumulator+update), and [Accumulator.del](#Accumulator+del).  
+**Returns**: [<code>Promise.&lt;WitnessUpdate&gt;</code>](#WitnessUpdate) - A witness of the element's membership.  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -158,20 +157,19 @@ public component. This object can be passed to [Prover.update](#Prover+update),
 
 <a name="Accumulator+del"></a>
 
-### accumulator.del(update) ⇒ [<code>Promise.&lt;Update&gt;</code>](#Update)
+### accumulator.del(witness) ⇒ [<code>Promise.&lt;Update&gt;</code>](#Update)
 Delete an element from the accumulation.
 
 **Kind**: instance method of [<code>Accumulator</code>](#Accumulator)  
-**Returns**: [<code>Promise.&lt;Update&gt;</code>](#Update) - The updated public component. This object can be passed to
-[Prover.update](#Prover+update).  
+**Returns**: [<code>Promise.&lt;Update&gt;</code>](#Update) - The updated public component.  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| update | [<code>Witness</code>](#Witness) | An object previously returned from [Accumulator.add](#Accumulator+add), [Accumulator.del](#Accumulator+del), or [Prover.prove](#Prover+prove). |
+| witness | [<code>Witness</code>](#Witness) \| [<code>WitnessUpdate</code>](#WitnessUpdate) | A witness of the element's membership. |
 
 <a name="Accumulator+verify"></a>
 
-### accumulator.verify(updateOrWitness) ⇒ <code>Promise.&lt;Boolean&gt;</code>
+### accumulator.verify(witness) ⇒ <code>Promise.&lt;Boolean&gt;</code>
 Verify an element is a member of the accumulation.
 
 **Kind**: instance method of [<code>Accumulator</code>](#Accumulator)  
@@ -179,7 +177,19 @@ Verify an element is a member of the accumulation.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| updateOrWitness | [<code>Update</code>](#Update) \| [<code>Witness</code>](#Witness) | An update object returned from [Accumulator.add](#Accumulator+add) or a witness object returned from [Prover.prove](#Prover+prove). |
+| witness | [<code>Witness</code>](#Witness) \| [<code>WitnessUpdate</code>](#WitnessUpdate) | A witness of the element's membership. |
+
+<a name="Accumulator+prove"></a>
+
+### accumulator.prove(d) ⇒ [<code>Promise.&lt;Witness&gt;</code>](#Witness)
+Compute a proof of membership for an element.
+
+**Kind**: instance method of [<code>Accumulator</code>](#Accumulator)  
+**Returns**: [<code>Promise.&lt;Witness&gt;</code>](#Witness) - A witness of the element's membership.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| d | <code>Data</code> | The element to prove. |
 
 
 ## Prover
@@ -214,7 +224,7 @@ accumulation.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| updateOrWitness | [<code>Update</code>](#Update) \| [<code>Witness</code>](#Witness) | An update or witness object returned from [Accumulator.add](#Accumulator+add) or [Accumulator.del](#Accumulator+del). |
+| updateOrWitness | [<code>Update</code>](#Update) \| [<code>WitnessUpdate</code>](#WitnessUpdate) | An update or witness. |
 
 <a name="Prover+prove"></a>
 
@@ -222,13 +232,11 @@ accumulation.
 Compute a proof of membership for an element.
 
 **Kind**: instance method of [<code>Prover</code>](#Prover)  
-**Returns**: [<code>Promise.&lt;Witness&gt;</code>](#Witness) - An object containing the element and its witness.
-This object can be passed to [Accumulator.verify](#Accumulator+verify) to verify membership,
-or to [Accumulator.del](#Accumulator+del) to delete the element.  
+**Returns**: [<code>Promise.&lt;Witness&gt;</code>](#Witness) - A witness of the element's membership.  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| d | <code>Data</code> | The element to add. |
+| d | <code>Data</code> | The element to prove. |
 
 <a name="Prover+verify"></a>
 
@@ -240,5 +248,5 @@ Verify an element is a member of the accumulation.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| updateOrWitness | [<code>Update</code>](#Update) \| [<code>Witness</code>](#Witness) | An update object returned from [Accumulator.add](#Accumulator+add) or a witness object returned from [Prover.prove](#Prover+prove). |
+| updateOrWitness | [<code>Witness</code>](#Witness) \| [<code>WitnessUpdate</code>](#WitnessUpdate) | An update or witness. |
 

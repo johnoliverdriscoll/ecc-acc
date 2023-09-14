@@ -95,6 +95,34 @@ describe('accumulator over secp256k1', function() {
 
       })
 
+      describe('prove', function() {
+
+        let accumulator
+
+        before('constructs accumulator', function() {
+          accumulator = new Accumulator(curve, hash, c)
+        })
+
+        const items = ['a', 'b', 'c']
+
+        before('accumulates values', async function() {
+          for (item of items) {
+            await accumulator.add(item)
+          }
+        })
+
+        it('proves item', async function() {
+          const witnesses = []
+          for (item of items) {
+            witnesses.push(await accumulator.prove(item))
+          }
+          for (witness of witnesses) {
+            await accumulator.verify(witness).should.be.fulfilledWith(true)
+          }
+        })
+
+      })
+
       describe('prover', function() {
 
         const hash = 'SHA-256'
@@ -238,24 +266,32 @@ describe('accumulator over secp256k1', function() {
           })
 
           const items = ['a', 'b', 'c']
-          let updates
+          const updates = []
 
           before('accumulates values', async function() {
-            updates = await Promise.all(items.map(async item => await accumulator.add(item)))
+            for (item of items) {
+              updates.push(await accumulator.add(item))
+            }
           })
 
           before('updates prover', async function() {
-            await Promise.all(updates.map(async update => await prover.update(update)))
+            for (update of updates) {
+              await prover.update(update)
+            }
           })
 
-          let witnesses
+          const witnesses = []
 
           before('computes witnesses', async function() {
-            witnesses = await Promise.all(items.map(async item => await prover.prove(item)))
+            for (item of items) {
+              witnesses.push(await prover.prove(item))
+            }
           })
 
           it('verifies witnesses', async function() {
-            await Promise.all(witnesses.map(async witness => await prover.verify(witness).should.be.fulfilledWith(true)))
+            for (witness of witnesses) {
+              await prover.verify(witness).should.be.fulfilledWith(true)
+            }
           })
 
         })
@@ -272,10 +308,16 @@ describe('accumulator over secp256k1', function() {
       it('accumulates, proves, and verifies', async function() {
         const accumulator = new Accumulator(curve, hash)
         const prover = new Prover(curve, hash)
-        const updates = await Promise.all(items.map(async item => await accumulator.add(item)))
-        await Promise.all(updates.map(async update => await prover.update(update)))
-        const witnesses = await Promise.all(items.map(async item => await prover.prove(item)))
-        await Promise.all(witnesses.map(async witness => await accumulator.verify(witness).should.be.fulfilledWith(true)))
+        for (item of items) {
+          await prover.update(await accumulator.add(item))
+        }
+        const witnesses = []
+        for (item of items) {
+          witnesses.push(await prover.prove(item))
+        }
+        for (witness of witnesses) {
+          await accumulator.verify(witness).should.be.fulfilledWith(true)
+        }
       })
 
     })
@@ -291,10 +333,16 @@ describe('accumulator over secp256k1', function() {
       const items = ['d', 'e', 'f']
       const accumulator = new Accumulator(curve, hash)
       const prover = new Prover(curve, hash)
-      const updates = await Promise.all(items.map(async item => await accumulator.add(item)))
-      await Promise.all(updates.map(async update => await prover.update(update)))
-      const witnesses = await Promise.all(items.map(async item => await prover.prove(item)))
-      await Promise.all(witnesses.map(async witness => await accumulator.verify(witness).should.be.fulfilledWith(true)))
+      for (item of items) {
+        await prover.update(await accumulator.add(item))
+      }
+      const witnesses = []
+      for (item of items) {
+        witnesses.push(await prover.prove(item))
+      }
+      for (witness of witnesses) {
+        await accumulator.verify(witness).should.be.fulfilledWith(true)
+      }
     })
 
   })
