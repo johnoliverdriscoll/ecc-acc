@@ -220,8 +220,15 @@ async function map(H, d, n) {
   } else {
     hash = H
   }
+
+  let data = d;
+  if (typeof(d) == 'string') {
+    let encoder = new TextEncoder();
+    data = encoder.encode(d);
+  }
+
   // Compute digest modulo the group order.
-  const buf = await hash(d)
+  const buf = await hash(data)
   return BigInt('0x' + bufferToHex(buf)) % n
 }
 
